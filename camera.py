@@ -17,6 +17,7 @@ p1 = Point(10, 10, 10)
 p2 = Point(15, 10, 10)
 cam = Point(0, 0, 0)
 ang = Point(0, 0, 0)
+e = Point(0, 0, 0)
 
 m1 = np.array([
     [1, 0, 0],
