@@ -1,84 +1,41 @@
-import numpy as np
 import pygame
-from math import sin, cos
-from point import Point
-
-# Thanks to https://en.wikipedia.org/wiki/3D_projection
-# https://en.wikipedia.org/wiki/Euler_angles#Tait%E2%80%93Bryan_angles
-# https://en.wikipedia.org/wiki/Camera_matrix
 
 pygame.init()
 screen = pygame.display.set_mode((1280, 720))
 clock = pygame.time.Clock()
 running = True
-dt = 0
 
-p1 = Point(10, 10, 10)
-p2 = Point(15, 10, 10)
-cam = Point(0, 0, 0)
-ang = Point(0, 0, 0)
-e = Point(0, 0, 0)
 
-m1 = np.array([
-    [1, 0, 0],
-    [0, cos(ang.x), sin(ang.x)],
-    [0, -sin(ang.x), cos(ang.x)]
-])
+def projection(vertex: tuple, d: float) -> tuple:
+    x = ((vertex[0] * d) / vertex[2]) + (screen.get_width() / 2)
+    y = ((vertex[1] * d) / vertex[2]) + (screen.get_height() / 2)
+    return x, y
 
-m2 = np.array([
-    [cos(ang.y), 0, -sin(ang.y)],
-    [0, 1, 0],
-    [sin(ang.y), 0, cos(ang.y)]
-])
 
-m3 = np.array([
-    [cos(ang.z), sin(ang.z), 0],
-    [-sin(ang.z), cos(ang.z), 0],
-    [0, 0, 1]
-])
+d = 100
 
-m4 = np.array([
-    [p1.x - cam.x],
-    [p1.y - cam.y],
-    [p1.z - cam.z]
-])
-
-m5 = np.array([
-    [p2.x - cam.x],
-    [p2.y - cam.y],
-    [p2.z - cam.z]
-])
-
-d = Point(*(m1 @ m2 @ m3 @ m4))
-print(d)
-b = Point((e.z / d.z) * d.x + e.x, (e.z / d.z) * d.y + e.y)
-print(b)
-
-d = Point(*(m1 @ m2 @ m3 @ m5))
-print(d)
-b = Point((e.z / d.z) * d.x + e.x, (e.z / d.z) * d.y + e.y)
-print(b)
-
-pygame.quit()
-
-player_pos = pygame.Vector2(screen.get_width() / 2, screen.get_height() / 2)
+edges = ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7))
+vertices = [(-50, -50, 100), (50, -50, 100), (50, -50, 150), (-50, -50, 150),
+            (-50, 50, 100), (50, 50, 100), (50, 50, 150), (-50, 50, 150)]
 
 while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
+    screen.fill('black')
 
-    screen.fill('white')
-    pygame.draw.circle(screen, 'red', player_pos, 50)
     keys = pygame.key.get_pressed()
-    if keys[pygame.K_UP]:
-        player_pos.y -= 300 * dt
-    if keys[pygame.K_DOWN]:
-        player_pos.y += 300 * dt
-    if keys[pygame.K_LEFT]:
-        player_pos.x -= 300 * dt
-    if keys[pygame.K_RIGHT]:
-        player_pos.x += 300 * dt
+    if keys[pygame.K_i]:
+        d += 0.1 * d
+    if keys[pygame.K_o]:
+        d -= 0.1 * d
+
+    vertices_2d = []
+    for v in vertices:
+        vertices_2d.append(projection(v, d))
+
+    for edge_id in edges:
+        pygame.draw.aaline(screen, 'white', vertices_2d[edge_id[0]], vertices_2d[edge_id[1]])
 
     pygame.display.flip()
     dt = clock.tick(60) / 1000
