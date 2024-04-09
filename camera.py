@@ -10,23 +10,23 @@ clock = pygame.time.Clock()
 running = True
 
 
-def projection(vertex: tuple, d: float) -> tuple:
+def project(vertex: np.ndarray, d: float) -> np.ndarray:
     if vertex[2] > 0.001:
         x = ((vertex[0] * d) / vertex[2]) + (screen.get_width() / 2)
         y = ((vertex[1] * d) / vertex[2]) + (screen.get_height() / 2)
     else:  # temp workaround for division by 0
         x = ((vertex[0] * d) / 0.001) + (screen.get_width() / 2)
         y = ((vertex[1] * d) / 0.001) + (screen.get_height() / 2)
-    return x, y
+    return np.array([x, y])
 
 
-def translate(vertex: tuple, t: list) -> tuple:
-    return vertex[0] + t[0], vertex[1] + t[1], vertex[2] + t[2]
+def translate(vertex: np.ndarray, tv: np.ndarray) -> np.ndarray:
+    return np.array([vertex[0] + tv[0], vertex[1] + tv[1], vertex[2] + tv[2]])
 
 
-def rotate(vertex: tuple, fi: list) -> tuple:
+def rotate(vertex: np.ndarray, rv: np.ndarray) -> np.ndarray:
     rot = np.identity(3)
-    x, y, z = fi
+    x, y, z = rv
     if x != 0:
         rot @= np.array([
             [1, 0, 0],
@@ -45,24 +45,24 @@ def rotate(vertex: tuple, fi: list) -> tuple:
             [sin(z), cos(z), 0],
             [0, 0, 1]
         ])
-    return (rot @ np.array(vertex).transpose()).tolist()
+    return rot @ vertex.transpose()
 
 
-d = 400
-t = 3
-r = pi / 64
+d = 400  # initial viewport
+t = 3  # translation step
+r = pi / 64  # rotation step
 
-edges = ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7))
-cuboids = [
-    [(-70, -50, 100), (-20, -50, 100), (-20, -50, 150), (-70, -50, 150),
-     (-70, 50, 100), (-20, 50, 100), (-20, 50, 150), (-70, 50, 150)],
-    [(20, -50, 100), (70, -50, 100), (70, -50, 150), (20, -50, 150),
-     (20, 50, 100), (70, 50, 100), (70, 50, 150), (20, 50, 150)],
-    [(-70, -50, 190), (-20, -50, 190), (-20, -50, 240), (-70, -50, 240),
-     (-70, 50, 190), (-20, 50, 190), (-20, 50, 240), (-70, 50, 240)],
-    [(20, -50, 190), (70, -50, 190), (70, -50, 240), (20, -50, 240),
-     (20, 50, 190), (70, 50, 190), (70, 50, 240), (20, 50, 240)]
-]
+edges = np.array([[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]])
+cuboids = np.array([
+    [[-70, -50, 100], [-20, -50, 100], [-20, -50, 150], [-70, -50, 150],
+     [-70, 50, 100], [-20, 50, 100], [-20, 50, 150], [-70, 50, 150]],
+    [[20, -50, 100], [70, -50, 100], [70, -50, 150], [20, -50, 150],
+     [20, 50, 100], [70, 50, 100], [70, 50, 150], [20, 50, 150]],
+    [[-70, -50, 190], [-20, -50, 190], [-20, -50, 240], [-70, -50, 240],
+     [-70, 50, 190], [-20, 50, 190], [-20, 50, 240], [-70, 50, 240]],
+    [[20, -50, 190], [70, -50, 190], [70, -50, 240], [20, -50, 240],
+     [20, 50, 190], [70, 50, 190], [70, 50, 240], [20, 50, 240]]
+], dtype=float)
 
 reset = copy.deepcopy(cuboids)
 
@@ -72,8 +72,8 @@ while running:
             running = False
     screen.fill('black')
 
-    tv = [0, 0, 0]
-    fi = [0, 0, 0]
+    tv = np.array([0, 0, 0], dtype=float)  # translation vector
+    rv = np.array([0, 0, 0], dtype=float)  # rotation vector
 
     keys = pygame.key.get_pressed()
     mods = pygame.key.get_mods()
@@ -97,26 +97,26 @@ while running:
         tv[1] -= t
     if keys[pygame.K_LEFT]:
         if mods & pygame.KMOD_CTRL:
-            fi[2] += r
+            rv[2] += r
         else:
-            fi[1] += r
+            rv[1] += r
     if keys[pygame.K_RIGHT]:
         if mods & pygame.KMOD_CTRL:
-            fi[2] -= r
+            rv[2] -= r
         else:
-            fi[1] -= r
+            rv[1] -= r
     if keys[pygame.K_UP]:
-        fi[0] -= r
+        rv[0] -= r
     if keys[pygame.K_DOWN]:
-        fi[0] += r
+        rv[0] += r
 
     cuboids_2d = []
     for i in range(len(cuboids)):
         vertices_2d = []
         for j in range(len(cuboids[i])):
             cuboids[i][j] = translate(cuboids[i][j], tv)
-            cuboids[i][j] = rotate(cuboids[i][j], fi)
-            vertices_2d.append(projection(cuboids[i][j], d))
+            cuboids[i][j] = rotate(cuboids[i][j], rv)
+            vertices_2d.append(project(cuboids[i][j], d))
         cuboids_2d.append(vertices_2d)
 
     for i in range(len(cuboids_2d)):
@@ -124,6 +124,6 @@ while running:
             pygame.draw.aaline(screen, 'white', cuboids_2d[i][edge_id[0]], cuboids_2d[i][edge_id[1]])
 
     pygame.display.flip()
-    dt = clock.tick(70) / 1000
+    dt = clock.tick(60) / 1000
 
 pygame.quit()
