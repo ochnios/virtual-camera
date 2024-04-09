@@ -1,6 +1,6 @@
+import copy
 from math import pi, cos, sin
 
-import numpy
 import numpy as np
 import pygame
 
@@ -25,7 +25,7 @@ def translate(vertex: tuple, t: list) -> tuple:
 
 
 def rotate(vertex: tuple, fi: list) -> tuple:
-    rot = numpy.identity(3)
+    rot = np.identity(3)
     x, y, z = fi
     if x != 0:
         rot @= np.array([
@@ -49,11 +49,22 @@ def rotate(vertex: tuple, fi: list) -> tuple:
 
 
 d = 400
+t = 3
 r = pi / 64
 
 edges = ((0, 1), (1, 2), (2, 3), (3, 0), (4, 5), (5, 6), (6, 7), (7, 4), (0, 4), (1, 5), (2, 6), (3, 7))
-vertices = [(-50, -50, 100), (50, -50, 100), (50, -50, 200), (-50, -50, 200),
-            (-50, 50, 100), (50, 50, 100), (50, 50, 200), (-50, 50, 200)]
+cuboids = [
+    [(-70, -50, 100), (-20, -50, 100), (-20, -50, 150), (-70, -50, 150),
+     (-70, 50, 100), (-20, 50, 100), (-20, 50, 150), (-70, 50, 150)],
+    [(20, -50, 100), (70, -50, 100), (70, -50, 150), (20, -50, 150),
+     (20, 50, 100), (70, 50, 100), (70, 50, 150), (20, 50, 150)],
+    [(-70, -50, 190), (-20, -50, 190), (-20, -50, 240), (-70, -50, 240),
+     (-70, 50, 190), (-20, 50, 190), (-20, 50, 240), (-70, 50, 240)],
+    [(20, -50, 190), (70, -50, 190), (70, -50, 240), (20, -50, 240),
+     (20, 50, 190), (70, 50, 190), (70, 50, 240), (20, 50, 240)]
+]
+
+reset = copy.deepcopy(cuboids)
 
 while running:
     for event in pygame.event.get():
@@ -61,54 +72,58 @@ while running:
             running = False
     screen.fill('black')
 
-    t = [0, 0, 0]
+    tv = [0, 0, 0]
     fi = [0, 0, 0]
 
     keys = pygame.key.get_pressed()
     mods = pygame.key.get_mods()
+    if keys[pygame.K_r]:
+        cuboids = copy.deepcopy(reset)
     if keys[pygame.K_i]:
         d += 0.1 * d
     if keys[pygame.K_o]:
         d -= 0.1 * d
+    if keys[pygame.K_w]:
+        tv[2] -= t
+    if keys[pygame.K_d]:
+        tv[0] -= t
+    if keys[pygame.K_s]:
+        tv[2] += t
+    if keys[pygame.K_a]:
+        tv[0] += t
+    if keys[pygame.K_SPACE]:
+        tv[1] += t
+    if mods & pygame.KMOD_SHIFT:
+        tv[1] -= t
     if keys[pygame.K_LEFT]:
         if mods & pygame.KMOD_CTRL:
-            fi[2] -= r
-        elif mods & pygame.KMOD_SHIFT:
-            fi[1] += r
+            fi[2] += r
         else:
-            t[0] += 5
+            fi[1] += r
     if keys[pygame.K_RIGHT]:
         if mods & pygame.KMOD_CTRL:
-            fi[2] += r
-        elif mods & pygame.KMOD_SHIFT:
+            fi[2] -= r
+        else:
             fi[1] -= r
-        else:
-            t[0] -= 5
     if keys[pygame.K_UP]:
-        if mods & pygame.KMOD_CTRL:
-            t[2] += 5
-        elif mods & pygame.KMOD_SHIFT:
-            fi[0] += r
-        else:
-            t[1] += 5
+        fi[0] -= r
     if keys[pygame.K_DOWN]:
-        if mods & pygame.KMOD_CTRL:
-            t[2] -= 5
-        elif mods & pygame.KMOD_SHIFT:
-            fi[0] -= r
-        else:
-            t[1] -= 5
+        fi[0] += r
 
-    vertices_2d = []
-    for idx in range(len(vertices)):
-        vertices[idx] = translate(vertices[idx], t)
-        vertices[idx] = rotate(vertices[idx], fi)
-        vertices_2d.append(projection(vertices[idx], d))
+    cuboids_2d = []
+    for i in range(len(cuboids)):
+        vertices_2d = []
+        for j in range(len(cuboids[i])):
+            cuboids[i][j] = translate(cuboids[i][j], tv)
+            cuboids[i][j] = rotate(cuboids[i][j], fi)
+            vertices_2d.append(projection(cuboids[i][j], d))
+        cuboids_2d.append(vertices_2d)
 
-    for edge_id in edges:
-        pygame.draw.aaline(screen, 'white', vertices_2d[edge_id[0]], vertices_2d[edge_id[1]])
+    for i in range(len(cuboids_2d)):
+        for edge_id in edges:
+            pygame.draw.aaline(screen, 'white', cuboids_2d[i][edge_id[0]], cuboids_2d[i][edge_id[1]])
 
     pygame.display.flip()
-    dt = clock.tick(60) / 1000
+    dt = clock.tick(70) / 1000
 
 pygame.quit()
