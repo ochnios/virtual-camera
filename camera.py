@@ -1,56 +1,15 @@
 import copy
-from math import pi, cos, sin
 
 import numpy as np
 import pygame
 
-pygame.init()
-screen = pygame.display.set_mode((1280, 720))
-clock = pygame.time.Clock()
-running = True
+from calc import translate, rotate, project
 
-
-def project(vertex: np.ndarray, d: float) -> np.ndarray:
-    if vertex[2] > 0.001:
-        x = ((vertex[0] * d) / vertex[2]) + (screen.get_width() / 2)
-        y = ((vertex[1] * d) / vertex[2]) + (screen.get_height() / 2)
-    else:  # temp workaround for division by 0
-        x = ((vertex[0] * d) / 0.001) + (screen.get_width() / 2)
-        y = ((vertex[1] * d) / 0.001) + (screen.get_height() / 2)
-    return np.array([x, y])
-
-
-def translate(vertex: np.ndarray, tv: np.ndarray) -> np.ndarray:
-    return np.array([vertex[0] + tv[0], vertex[1] + tv[1], vertex[2] + tv[2]])
-
-
-def rotate(vertex: np.ndarray, rv: np.ndarray) -> np.ndarray:
-    rot = np.identity(3)
-    x, y, z = rv
-    if x != 0:
-        rot @= np.array([
-            [1, 0, 0],
-            [0, cos(x), -sin(x)],
-            [0, sin(x), cos(x)]
-        ])
-    if y != 0:
-        rot @= np.array([
-            [cos(y), 0, sin(y)],
-            [0, 1, 0],
-            [-sin(y), 0, cos(y)]
-        ])
-    if z != 0:
-        rot @= np.array([
-            [cos(z), -sin(z), 0],
-            [sin(z), cos(z), 0],
-            [0, 0, 1]
-        ])
-    return rot @ vertex.transpose()
-
-
+vww = 1280  # viewport width
+vwh = 720  # viewport height
 d = 400  # initial viewport
 t = 3  # translation step
-r = pi / 64  # rotation step
+r = np.pi / 64  # rotation step
 
 edges = np.array([[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]])
 cuboids = np.array([
@@ -63,8 +22,13 @@ cuboids = np.array([
     [[20, -50, 190], [70, -50, 190], [70, -50, 240], [20, -50, 240],
      [20, 50, 190], [70, 50, 190], [70, 50, 240], [20, 50, 240]]
 ], dtype=float)
-
 reset = copy.deepcopy(cuboids)
+
+pygame.init()
+pygame.display.set_caption('VCAM')
+screen = pygame.display.set_mode((vww, vwh))
+clock = pygame.time.Clock()
+running = True
 
 while running:
     for event in pygame.event.get():
@@ -116,7 +80,7 @@ while running:
         for j in range(len(cuboids[i])):
             cuboids[i][j] = translate(cuboids[i][j], tv)
             cuboids[i][j] = rotate(cuboids[i][j], rv)
-            vertices_2d.append(project(cuboids[i][j], d))
+            vertices_2d.append(project(cuboids[i][j], d, vww, vwh))
         cuboids_2d.append(vertices_2d)
 
     for i in range(len(cuboids_2d)):
