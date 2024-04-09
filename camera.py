@@ -10,6 +10,8 @@ vwh = 720  # viewport height
 d = 400  # initial viewport
 t = 3  # translation step
 r = np.pi / 64  # rotation step
+bg = 'black'
+fg = 'white'
 
 edges = np.array([[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]])
 cuboids = np.array([
@@ -34,13 +36,15 @@ while running:
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             running = False
-    screen.fill('black')
+    screen.fill(bg)
 
     tv = np.array([0, 0, 0], dtype=float)  # translation vector
     rv = np.array([0, 0, 0], dtype=float)  # rotation vector
 
     keys = pygame.key.get_pressed()
     mods = pygame.key.get_mods()
+    if keys[pygame.K_ESCAPE]:
+        running = False
     if keys[pygame.K_r]:
         cuboids = copy.deepcopy(reset)
     if keys[pygame.K_i]:
@@ -78,14 +82,13 @@ while running:
     for i in range(len(cuboids)):
         vertices_2d = []
         for j in range(len(cuboids[i])):
-            cuboids[i][j] = translate(cuboids[i][j], tv)
-            cuboids[i][j] = rotate(cuboids[i][j], rv)
+            cuboids[i][j] = rotate(translate(cuboids[i][j], tv), rv)
             vertices_2d.append(project(cuboids[i][j], d, vww, vwh))
         cuboids_2d.append(vertices_2d)
 
     for i in range(len(cuboids_2d)):
-        for edge_id in edges:
-            pygame.draw.aaline(screen, 'white', cuboids_2d[i][edge_id[0]], cuboids_2d[i][edge_id[1]])
+        for edge in edges:
+            pygame.draw.aaline(screen, fg, cuboids_2d[i][edge[0]], cuboids_2d[i][edge[1]])
 
     pygame.display.flip()
     dt = clock.tick(60) / 1000
