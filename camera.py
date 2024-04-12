@@ -53,10 +53,8 @@ while running:
     # zoom
     if keys[pygame.K_i] and d <= 5000:
         d += 0.1 * d
-        print(d)
     if keys[pygame.K_o] and d >= 1:
         d -= 0.1 * d
-        print(d)
     # translations
     if keys[pygame.K_w]:
         tv[2] -= t
