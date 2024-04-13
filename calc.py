@@ -1,4 +1,4 @@
-from math import cos, sin
+from math import cos, sin, sqrt
 
 import numpy as np
 
@@ -39,3 +39,7 @@ def rotate(vertex: np.ndarray, rv: np.ndarray) -> np.ndarray:
             [0, 0, 1]
         ])
     return rot @ vertex.transpose()
+
+
+def distance(p1: np.ndarray, p2: np.ndarray) -> float:
+    return sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2 + (p2[2] - p1[2]) ** 2)

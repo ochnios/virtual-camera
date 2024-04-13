@@ -93,12 +93,14 @@ while running:
         rv[2] -= r
 
     for i in range(len(polygons)):
-        centroid_z = .0
+        centroid = np.zeros(3)
         for j in range(len(polygons[i])):
             polygons[i][j] = rotate(translate(polygons[i][j], tv), rv)
             polygons_2d[i][j] = project(polygons[i][j], d, vww, vwh, 1)
-            centroid_z += polygons[i][j][2]
-        centroids[i] = centroid_z / len(polygons[i])
+            centroid = centroid + polygons[i][j]
+        # for current scene works better than z based approach
+        # centroids[i] = distance(centroid / 4, np.zeros(3))
+        centroids[i] = centroid[2] / 4
 
     indices = centroids.argsort()[::-1][:len(centroids)]
     sorted_polygons = polygons_2d[indices]
