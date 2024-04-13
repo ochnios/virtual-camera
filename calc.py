@@ -3,8 +3,8 @@ from math import cos, sin
 import numpy as np
 
 
-def project(vertex: np.ndarray, d: float, vww: float, vwh: float, z0=0.001) -> np.ndarray:
-    if vertex[2] > 0.001:
+def project(vertex: np.ndarray, d: float, vww: float, vwh: float, z0=0.01) -> np.ndarray:
+    if vertex[2] > 0.01:
         x = ((vertex[0] * d) / vertex[2]) + (vww / 2)
         y = ((vertex[1] * d) / vertex[2]) + (vwh / 2)
     else:
