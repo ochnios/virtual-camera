@@ -8,8 +8,8 @@ def project(vertex: np.ndarray, d: float, vww: float, vwh: float) -> np.ndarray:
         x = ((vertex[0] * d) / vertex[2]) + (vww / 2)
         y = ((vertex[1] * d) / vertex[2]) + (vwh / 2)
     else:  # temp workaround for division by 0
-        x = ((vertex[0] * d) / 0.001) + (vww / 2)
-        y = ((vertex[1] * d) / 0.001) + (vwh / 2)
+        x = (vertex[0] * d) + (vww / 2)
+        y = (vertex[1] * d) + (vwh / 2)
     return np.array([x, y])
 
 
