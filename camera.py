@@ -10,8 +10,8 @@ vwh = 720  # viewport height
 d = 400  # initial viewport
 t = 2  # translation step
 r = np.pi / 64  # rotation step
-bg = 'black'
-fg = 'white'
+bg = 'white'
+fg = 'black'
 
 edges = np.array([[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]])
 cuboids = np.array([

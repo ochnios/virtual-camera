@@ -3,7 +3,7 @@ import copy
 import numpy as np
 import pygame
 
-from calc import translate, rotate, project
+from calc import translate, rotate, project, distance
 
 vww = 1280  # viewport width
 vwh = 720  # viewport height
@@ -14,6 +14,8 @@ bg = 'white'
 fg = 'black'
 
 faces = np.array([[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]], dtype=int)
+faces_colors = np.array([[245, 85, 26], [125, 188, 57], [7, 92, 191], [249, 248, 84], [54, 201, 240], [91, 26, 255]],
+                        dtype=int)
 cuboids = np.array([
     [[-70, -50, 100], [-20, -50, 100], [-20, -50, 150], [-70, -50, 150],
      [-70, 50, 100], [-20, 50, 100], [-20, 50, 150], [-70, 50, 150]],
@@ -27,8 +29,10 @@ cuboids = np.array([
 n_cuboids = len(cuboids)
 
 polygons = np.zeros((n_cuboids * 6, 4, 3), dtype=float)
+colors = np.zeros((n_cuboids * 6, 3), dtype=int)
 for i in range(n_cuboids):
     for j in range(6):
+        colors[i * 6 + j] = faces_colors[(i * 6 + j) % 6]
         for k in range(4):
             polygons[i * 6 + j][k] = cuboids[i][faces[j][k]]
 
@@ -99,14 +103,13 @@ while running:
             polygons_2d[i][j] = project(polygons[i][j], d, vww, vwh, 1)
             centroid = centroid + polygons[i][j]
         # for current scene works better than z based approach
-        # centroids[i] = distance(centroid / 4, np.zeros(3))
-        centroids[i] = centroid[2] / 4
+        centroids[i] = distance(centroid / 4, np.zeros(3))
+        # centroids[i] = centroid[2] / 4
 
     indices = centroids.argsort()[::-1][:len(centroids)]
-    sorted_polygons = polygons_2d[indices]
-    for polygon in sorted_polygons:
-        pygame.draw.polygon(screen, bg, polygon)
-        pygame.draw.lines(screen, fg, True, polygon, 2)
+    for i in indices:
+        pygame.draw.polygon(screen, tuple(colors[i]), polygons_2d[i])
+        pygame.draw.lines(screen, fg, True, polygons_2d[i], 2)
 
     pygame.display.flip()
     dt = clock.tick(60) / 1000
