@@ -2,9 +2,9 @@ import numpy as np
 
 import calc
 
-faces = np.array([[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]], dtype=int)
-faces_colors = np.array(
-    [[245, 85, 26], [125, 188, 57], [7, 92, 191], [249, 248, 84], [54, 201, 240], [91, 26, 255]], dtype=int)
+edges = np.array([[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]])
+faces = np.array([[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]])
+faces_colors = np.array([[245, 85, 26], [125, 188, 57], [7, 92, 191], [249, 248, 84], [54, 201, 240], [91, 26, 255]])
 cuboids = np.array([
     [[-70, -50, 100], [-20, -50, 100], [-20, -50, 150], [-70, -50, 150],
      [-70, 50, 100], [-20, 50, 100], [-20, 50, 150], [-70, 50, 150]],
@@ -15,10 +15,10 @@ cuboids = np.array([
     [[20, -50, 190], [70, -50, 190], [70, -50, 240], [20, -50, 240],
      [20, 50, 190], [70, 50, 190], [70, 50, 240], [20, 50, 240]]
 ], dtype=float)
-n_cuboids = len(cuboids)
 
 
 def cuboids_as_rectangles() -> tuple[np.ndarray, np.ndarray]:
+    n_cuboids = len(cuboids)
     rectangles = np.zeros((n_cuboids * 6, 4, 3), dtype=float)
     colors = np.zeros((n_cuboids * 6, 3), dtype=int)
     for i in range(n_cuboids):
