@@ -9,10 +9,11 @@ import data
 vww = 1280  # viewport width
 vwh = 720  # viewport height
 d = 400  # initial viewport
-t = 2  # translation step
+t = 3  # translation step
 r = np.pi / 64  # rotation step
 bg = 'white'
 fg = 'black'
+cam = np.zeros(3)
 
 polygons, colors = data.cuboids_as_rectangles()
 # polygons, colors = data.cuboids_as_triangles()
@@ -80,9 +81,9 @@ while running:
         for j in range(len(polygons[i])):
             polygons[i][j] = calc.rotate(calc.translate(polygons[i][j], tv), rv)
             polygons_2d[i][j] = calc.project(polygons[i][j], d, vww, vwh, 1)
-        centroid = polygons[i].mean(axis=0)
-        order[i] = calc.distance(centroid, np.zeros(3))
-        # order[i] = centroid[2] / 4
+        order[i] = calc.rect_min_dist(polygons[i], cam, 3)  # nearest point approach
+        # order[i] = calc.distance(polygons[i].mean(axis=0), np.zeros(3))  # centroid distance approach
+        # order[i] = polygons[i].mean(axis=0)[2] / 4  # z approach
 
     indices = order.argsort()[::-1][:len(order)]
     for i in indices:

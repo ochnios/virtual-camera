@@ -43,3 +43,19 @@ def rotate(vertex: np.ndarray, rv: np.ndarray) -> np.ndarray:
 
 def distance(p1: np.ndarray, p2: np.ndarray) -> float:
     return sqrt((p2[0] - p1[0]) ** 2 + (p2[1] - p1[1]) ** 2 + (p2[2] - p1[2]) ** 2)
+
+
+def rect_min_dist(rect: np.ndarray, point: np.ndarray, cell_size=10) -> float:
+    if len(rect) != 4:
+        # for non rectangle polys return centroid distance
+        return np.linalg.norm(point - rect.mean(axis=0))
+
+    x_size = round(np.linalg.norm(rect[0] - rect[1]) / cell_size)
+    y_size = round(np.linalg.norm(rect[0] - rect[3]) / cell_size)
+    step_x = -(rect[0] - rect[1]) / x_size
+    step_y = -(rect[0] - rect[3]) / y_size
+    min_d = np.linalg.norm(point - rect[0])
+    for i in range(x_size + 1):
+        for j in range(y_size + 1):
+            min_d = min(min_d, np.linalg.norm(point - (rect[0] + (step_x * i) + (step_y * j))))
+    return min_d
