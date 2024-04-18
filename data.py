@@ -32,6 +32,5 @@ def just_rectangles() -> tuple:
         [[-30, -60, 120], [30, -60, 120], [30, 40, 100], [-30, 40, 100]],
         [[-30, -80, 120], [30, -80, 120], [30, 20, 100], [-30, 20, 100]]
     ], dtype=float)
-    print(rectangles)
     colors = np.array([[0, 0, 255], [255, 0, 0]])
     return rectangles, colors
