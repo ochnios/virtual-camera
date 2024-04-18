@@ -1,7 +1,5 @@
 import numpy as np
 
-import calc
-
 edges = np.array([[0, 1], [1, 2], [2, 3], [3, 0], [4, 5], [5, 6], [6, 7], [7, 4], [0, 4], [1, 5], [2, 6], [3, 7]])
 faces = np.array([[0, 1, 2, 3], [4, 5, 6, 7], [0, 1, 5, 4], [1, 2, 6, 5], [2, 3, 7, 6], [3, 0, 4, 7]])
 faces_colors = np.array([[245, 85, 26], [125, 188, 57], [7, 92, 191], [249, 248, 84], [54, 201, 240], [91, 26, 255]])
@@ -29,25 +27,11 @@ def cuboids_as_rectangles() -> tuple[np.ndarray, np.ndarray]:
     return rectangles, colors
 
 
-def cuboids_as_triangles(cell_size=10) -> tuple:
-    rectangles, colors = cuboids_as_rectangles()
-    triangles = []
-    new_colors = []
-    for idx in range(len(rectangles)):
-        x_size = round(calc.distance(rectangles[idx][0], rectangles[idx][1]) / cell_size)
-        y_size = round(calc.distance(rectangles[idx][0], rectangles[idx][3]) / cell_size)
-        step_x = -(rectangles[idx][0] - rectangles[idx][1]) / x_size
-        step_y = -(rectangles[idx][0] - rectangles[idx][3]) / y_size
-        for i in range(x_size):
-            for j in range(y_size):
-                cell = [
-                    rectangles[idx][0] + (step_x * i) + (step_y * j),
-                    rectangles[idx][0] + (step_x * (i + 1)) + (step_y * j),
-                    rectangles[idx][0] + (step_x * (i + 1)) + (step_y * (j + 1)),
-                    rectangles[idx][0] + (step_x * i) + (step_y * (j + 1))
-                ]
-                new_colors.append(colors[idx])
-                new_colors.append(colors[idx])
-                triangles.append(cell[0:3])
-                triangles.append([cell[2], cell[3], cell[0]])
-    return np.array(triangles), np.array(new_colors)
+def just_rectangles() -> tuple:
+    rectangles = np.array([
+        [[-30, -60, 120], [30, -60, 120], [30, 40, 100], [-30, 40, 100]],
+        [[-30, -80, 120], [30, -80, 120], [30, 20, 100], [-30, 20, 100]]
+    ], dtype=float)
+    print(rectangles)
+    colors = np.array([[0, 0, 255], [255, 0, 0]])
+    return rectangles, colors

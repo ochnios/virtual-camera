@@ -59,3 +59,26 @@ def rect_min_dist(rect: np.ndarray, point: np.ndarray, cell_size=10) -> float:
         for j in range(y_size + 1):
             min_d = min(min_d, np.linalg.norm(point - (rect[0] + (step_x * i) + (step_y * j))))
     return min_d
+
+
+def split_rectangles(rectangles, colors, cell_size=10):
+    triangles = []
+    new_colors = []
+    for idx in range(len(rectangles)):
+        x_size = round(np.linalg.norm(rectangles[idx][0] - rectangles[idx][1]) / cell_size)
+        y_size = round(np.linalg.norm(rectangles[idx][0] - rectangles[idx][3]) / cell_size)
+        step_x = -(rectangles[idx][0] - rectangles[idx][1]) / x_size
+        step_y = -(rectangles[idx][0] - rectangles[idx][3]) / y_size
+        for i in range(x_size):
+            for j in range(y_size):
+                cell = [
+                    rectangles[idx][0] + (step_x * i) + (step_y * j),
+                    rectangles[idx][0] + (step_x * (i + 1)) + (step_y * j),
+                    rectangles[idx][0] + (step_x * (i + 1)) + (step_y * (j + 1)),
+                    rectangles[idx][0] + (step_x * i) + (step_y * (j + 1))
+                ]
+                new_colors.append(colors[idx])
+                new_colors.append(colors[idx])
+                triangles.append(cell[0:3])
+                triangles.append([cell[2], cell[3], cell[0]])
+    return np.array(triangles), np.array(new_colors)
