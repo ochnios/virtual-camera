@@ -30,7 +30,7 @@ def cuboids_as_rectangles() -> tuple[np.ndarray, np.ndarray]:
 def just_rectangles() -> tuple:
     rectangles = np.array([
         [[-30, -60, 120], [30, -60, 120], [30, 40, 100], [-30, 40, 100]],
-        [[-30, -80, 120], [30, -80, 120], [30, 20, 100], [-30, 20, 100]]
+        [[-30, -70, 120], [30, -70, 120], [30, 30, 100], [-30, 30, 100]]
     ], dtype=float)
     colors = np.array([[0, 0, 255], [255, 0, 0]])
     return rectangles, colors

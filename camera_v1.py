@@ -15,11 +15,9 @@ r = np.pi / 64  # rotation step
 bg = 'white'
 fg = 'black'
 cam = np.zeros(3)
-borders = True
+borders = False
 
 polygons, colors = data.cuboids_as_rectangles()
-# polygons, colors = data.just_rectangles()
-# polygons, colors = calc.split_rectangles(polygons, colors, 5)
 polygons_2d = np.zeros((len(polygons), len(polygons[0]), 2), dtype=float)
 order = np.zeros(len(polygons), dtype=float)
 
@@ -51,6 +49,19 @@ while running:
     if keys[pygame.K_b]:
         borders = not borders
         time.sleep(0.1)
+    if keys[pygame.K_1]:
+        polygons, colors = data.cuboids_as_rectangles()
+        polygons_2d = np.zeros((len(polygons), len(polygons[0]), 2), dtype=float)
+        order = np.zeros(len(polygons), dtype=float)
+        polygons_reset = copy.deepcopy(polygons)
+        time.sleep(0.314)
+    if keys[pygame.K_2]:
+        polygons, colors = data.just_rectangles()
+        polygons, colors = calc.split_rectangles(polygons, colors, 5)
+        polygons_2d = np.zeros((len(polygons), len(polygons[0]), 2), dtype=float)
+        order = np.zeros(len(polygons), dtype=float)
+        polygons_reset = copy.deepcopy(polygons)
+        time.sleep(0.314)
     # zoom
     if keys[pygame.K_i] and d <= 5000:
         d += 0.1 * d
@@ -87,8 +98,8 @@ while running:
         for j in range(len(polygons[i])):
             polygons[i][j] = calc.rotate(calc.translate(polygons[i][j], tv), rv)
             polygons_2d[i][j] = calc.project(polygons[i][j], d, vww, vwh, 1)
-        order[i] = calc.rect_min_dist(polygons[i], cam, 5)  # nearest point approach
-        # order[i] = calc.distance(polygons[i].mean(axis=0), np.zeros(3))  # centroid distance approach
+        order[i] = calc.min_dist(polygons[i], cam, 3)  # nearest point approach
+        # order[i] = calc.distance(polygons[i].mean(axis=0), cam)  # centroid distance approach
         # order[i] = polygons[i].mean(axis=0)[2] / 4  # z approach
 
     indices = order.argsort()[::-1][:len(order)]
