@@ -109,6 +109,6 @@ while running:
             pygame.draw.lines(screen, fg, True, polygons_2d[i], 1)
 
     pygame.display.flip()
-    dt = clock.tick(60) / 1000
+    dt = clock.tick(30) / 1000
 
 pygame.quit()
